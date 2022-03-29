@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { Client, Intents } = require('discord.js');
+const { Client, Intents, MessageEmbed } = require('discord.js');
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
@@ -14,14 +14,24 @@ client.on('message', async msg => {
         msg.channel.send("Pong!");
         break;
       case "yulia getthreads active":
+        let threadsEmbed = new MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle('List of Threads')
+            .setDescription('Here is the list of threads in this server')
+            .addField('NOTE', 'These threads are accurate only as of the date below. To refresh, let your officers know.')
+            .setTimestamp();
         msg.guild.channels.fetchActiveThreads()
             .then(fetched => {
-                console.log(`There are ${fetched.threads.size} threads.`);
                 fetched.threads.map((thread) => {
-                    console.log(thread.name);
+                    const details = thread.parent.name.concat("\n Created: ", thread.createdAt.toDateString());
+                    if (!!thread.lastMessage?.createdAt) {
+                        details.concat("\n Last Message: ", thread.lastMessage.createdAt.toDateString());
+                    }
+                    threadsEmbed.addField(thread.name, details);
                 });
             })
             .catch(console.error);
+        // msg.channel.send({ embeds: [threadsEmbed] });
         break;
      }
   })
