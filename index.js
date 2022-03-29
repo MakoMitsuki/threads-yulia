@@ -10,11 +10,18 @@ client.on('ready', () => {
 
 client.on('message', async msg => {
     switch (msg.content) {
-      case "yulia getallthreads":
+      case "yulia getthreads":
         msg.channel.send("Pong!");
         break;
-      case "!meme":
-        msg.channel.send("Here's your meme!");
+      case "yulia getthreads active":
+        msg.guild.channels.fetchActiveThreads()
+            .then(fetched => {
+                console.log(`There are ${fetched.threads.size} threads.`);
+                fetched.threads.map((thread) => {
+                    console.log(thread.name);
+                });
+            })
+            .catch(console.error);
         break;
      }
   })
