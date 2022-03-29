@@ -22,7 +22,11 @@ client.on('message', async msg => {
             .setTimestamp();
         await msg.guild.channels.fetchActiveThreads()
             .then(fetched => {
-                fetched.threads.map((thread) => {
+                fetched.threads.sort((thread1, thread2) => {
+                    if(thread1.parent.name < thread2.parent.name) { return -1; }
+                    if(thread1.parent.name > thread2.parent.name) { return 1; }
+                    return 0;
+                }).map((thread) => {
                     const details = thread.parent.name.concat("\n Created: ", thread.createdAt.toDateString());
                     if (!!thread.lastMessage?.createdAt) {
                         details.concat("\n Last Message: ", thread.lastMessage.createdAt.toDateString());
