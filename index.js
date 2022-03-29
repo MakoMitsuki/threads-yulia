@@ -20,7 +20,7 @@ client.on('message', async msg => {
             .setDescription('Here is the list of threads in this server')
             .addField('NOTE', 'These threads are accurate only as of the date below. To refresh, let your officers know.')
             .setTimestamp();
-        msg.guild.channels.fetchActiveThreads()
+        await msg.guild.channels.fetchActiveThreads()
             .then(fetched => {
                 fetched.threads.map((thread) => {
                     const details = thread.parent.name.concat("\n Created: ", thread.createdAt.toDateString());
@@ -31,7 +31,7 @@ client.on('message', async msg => {
                 });
             })
             .catch(console.error);
-        // msg.channel.send({ embeds: [threadsEmbed] });
+        msg.channel.send({ embeds: [threadsEmbed] });
         break;
      }
   })
