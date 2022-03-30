@@ -68,7 +68,7 @@ client.on('message', async msg => {
         
         let channels = await msg.guild.channels.fetch();
 
-        channels.forEach((channel) => {
+        channels.forEach(async (channel) => {
           let hasHeader = false;
 
           // get active threads
@@ -77,7 +77,8 @@ client.on('message', async msg => {
           });*/
 
           // get archived threads
-          result = getArchivedThreads(channel.id);
+          let result = [];
+          await getArchivedThreads(channel.id).then(r => result = r);
           if(result) {
             if (!hasHeader && result.length !== 0){
               threadsEmbedAll.addField(arrowForward.concat("\t", channel.name.toUpperCase()), '\u200B', false);
