@@ -17,6 +17,8 @@ client.on('message', async msg => {
             .setColor('#0099ff')
             .setTitle('List of Threads')
             .setDescription('Here is the list of threads in this server')
+            .setThumbnail(msg.guild.iconURL())
+            .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
             .setTimestamp();
         // https://discord.js.org/#/docs/discord.js/stable/class/GuildChannelManager
 
