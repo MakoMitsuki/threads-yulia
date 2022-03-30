@@ -9,7 +9,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 
 const arrowForward = ":arrow_forward:";
 
-const getArchivedThreads = (channelId) => {
+const getArchivedThreads = async (channelId) => {
   let archivedThreads = [];
 
   let myHeaders = new fetch.Headers();
@@ -21,7 +21,7 @@ const getArchivedThreads = (channelId) => {
     redirect: 'follow'
   };
 
-  fetch(`https://discordapp.com/api/channels/${channelId}/threads/archived/public`, requestOptions)
+  await fetch(`https://discordapp.com/api/channels/${channelId}/threads/archived/public`, requestOptions)
     .then(response => response.json())
     .then(data => {
       archivedThreads = data.threads;
