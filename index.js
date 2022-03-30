@@ -7,6 +7,8 @@ const token = process.env.CLIENT_TOKEN;
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
+const arrowForward = ":arrow_forward:";
+
 const getArchivedThreads = async (channelId) => {
   let archivedThreads = [];
 
@@ -52,54 +54,90 @@ client.on('ready', () => {
 });
 
 client.on('message', async msg => {
+    let guildId = msg.guild.id;
+
     switch (msg.content) {
-      case "yulia getthreads sorted":
-        break;
-      case "yulia getthreads active":
-        let threadsEmbed = new MessageEmbed()
+      case "yulia getAllThreads":
+        let threadsEmbedAll = new MessageEmbed()
             .setColor('#0099ff')
             .setTitle('List of Threads')
-            .setDescription('Here is the list of threads in this server')
+            .setDescription('Here is the list of all threads in this server')
+            .setThumbnail(msg.guild.iconURL())
+            .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
+            .setTimestamp();
+        
+        await msg.guild.channels.fetch()
+          .then((channels) => {
+            channels.forEach(async (channel) => {
+              let hasHeader = false;
+
+              // get active threads
+              /*channel.threads.forEach(t => {
+                threadsEmbedAll.addField(t.name, threadDetails(t, guildId), true);
+              });*/
+
+              // get archived threads
+              await getArchivedThreads(channel.id).then(result => {
+                if(result) {
+                  if (!hasHeader && result.length !== 0){
+                    threadsEmbedAll.addField(arrowForward.concat("\t", channel.name.toUpperCase()), '\u200B', false);
+                    hasHeader = true;
+                    console.log(`=== ${channel.name}`);
+                  }
+                  
+                  result.forEach(t => {
+                    msg.channel.send(`========= ${t.name}`);
+                    threadsEmbedAll.addField(`:lock:\t${t.name}`, apiThreadDetails(t, guildId), true);
+                  });
+                }
+              });
+              
+              if (hasHeader) {
+                threadsEmbedAll.addField('\u200B', '\u200B');
+                console.log(`=== end of ${channel.name}`);
+              };
+            });
+          })
+          .catch(console.error);
+
+        await msg.channel.send({ embeds: [threadsEmbedAll] });
+        console.log(" THIS IS THE END ");
+        break;
+      case "yulia getthreads active":
+        let threadsEmbedActive = new MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle('List of Active Threads')
+            .setDescription('Here is the list of active threads in this server')
             .setThumbnail(msg.guild.iconURL())
             .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
             .setTimestamp();
 
         let lastChannel = '';
-        let guildId = msg.guild.id;
-        let arrowForward = ":arrow_forward:";
         let firstChannel = true;
 
         await msg.guild.channels.fetchActiveThreads()
-            .then(fetched => {
-                fetched.threads.sort((thread1, thread2) => {
-                    if(thread1.parent.name < thread2.parent.name) { return -1; }
-                    if(thread1.parent.name > thread2.parent.name) { return 1; }
-                    return 0;
-                }).map((thread) => {
-                    if (thread.parent.name !== lastChannel)
-                    {
-                      if (!firstChannel) {
-                        threadsEmbed.addField('\u200B', '\u200B');
-                      }
-                      threadsEmbed.addField(arrowForward.concat("\t", thread.parent.name.toUpperCase()), '\u200B', false);
+          .then(fetched => {
+            fetched.threads.sort((thread1, thread2) => {
+                if(thread1.parent.name < thread2.parent.name) { return -1; }
+                if(thread1.parent.name > thread2.parent.name) { return 1; }
+                return 0;
+            }).map((thread) => {
+                if (thread.parent.name !== lastChannel)
+                {
+                  if (!firstChannel) {
+                    threadsEmbedActive.addField('\u200B', '\u200B');
+                  }
+                  threadsEmbedActive.addField(arrowForward.concat("\t", thread.parent.name.toUpperCase()), '\u200B', false);
 
-                      // get archived threads
-                      getArchivedThreads(thread.parent.id).then(async (archivedThreads) => {
-                        await archivedThreads.forEach(t => {
-                          console.log(t);
-                          threadsEmbed.addField(`:lock:\t${t.name}`, apiThreadDetails(t, guildId), true)
-                        });
-                      });
+                  lastChannel = thread.parent.name;
+                  firstChannel = false;
+                }
 
-                      lastChannel = thread.parent.name;
-                      firstChannel = false;
-                    }
-
-                    threadsEmbed.addField(thread.name, threadDetails(thread, guildId), true);
-                });
-            })
-            .catch(console.error);
-        msg.channel.send({ embeds: [threadsEmbed] });
+                threadsEmbedActive.addField(thread.name, threadDetails(thread, guildId), true);
+            });
+          })
+          .catch(console.error);
+        msg.channel.send({ embeds: [threadsEmbedActive] });
         break;
      }
   })
