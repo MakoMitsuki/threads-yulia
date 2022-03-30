@@ -10,16 +10,21 @@ client.on('ready', () => {
 
 client.on('message', async msg => {
     switch (msg.content) {
-      case "yulia getthreads":
-        msg.channel.send("Pong!");
+      case "yulia getthreads sorted":
         break;
       case "yulia getthreads active":
         let threadsEmbed = new MessageEmbed()
             .setColor('#0099ff')
             .setTitle('List of Threads')
             .setDescription('Here is the list of threads in this server')
-            .addField('NOTE', 'These threads are accurate only as of the date below. To refresh, let your officers know.')
             .setTimestamp();
+        // https://discord.js.org/#/docs/discord.js/stable/class/GuildChannelManager
+
+        let lastChannel = '';
+        let guildId = msg.guild.id;
+        let arrowForward = ":arrow_forward:";
+        let firstChannel = true;
+
         await msg.guild.channels.fetchActiveThreads()
             .then(fetched => {
                 fetched.threads.sort((thread1, thread2) => {
@@ -27,11 +32,23 @@ client.on('message', async msg => {
                     if(thread1.parent.name > thread2.parent.name) { return 1; }
                     return 0;
                 }).map((thread) => {
-                    const details = thread.parent.name.concat("\n Created: ", thread.createdAt.toDateString());
-                    if (!!thread.lastMessage?.createdAt) {
-                        details.concat("\n Last Message: ", thread.lastMessage.createdAt.toDateString());
+                    if (thread.parent.name !== lastChannel)
+                    {
+                      if (!firstChannel) {
+                        threadsEmbed.addField('\u200B', '\u200B');
+                      }
+                      threadsEmbed.addField(arrowForward.concat("\t", thread.parent.name.toUpperCase()), '\u200B', false);
+                      lastChannel = thread.parent.name;
+                      firstChannel = false;
                     }
-                    threadsEmbed.addField(thread.name, details);
+
+                    let details = "Created: ".concat(thread.createdAt.toDateString());
+                    if (thread.lastMessage) {
+                        details = details.concat("\n Last Message: ", thread.lastMessage.createdAt.toDateString());
+                    }
+                    details = details.concat(`\n[Go to ${thread.name}](https://discord.com/channels/${guildId}/${thread.id})`);
+
+                    threadsEmbed.addField(thread.name, details, true);
                 });
             })
             .catch(console.error);
