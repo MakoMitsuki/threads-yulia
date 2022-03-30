@@ -20,7 +20,6 @@ client.on('message', async msg => {
             .setThumbnail(msg.guild.iconURL())
             .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
             .setTimestamp();
-        // https://discord.js.org/#/docs/discord.js/stable/class/GuildChannelManager
 
         let lastChannel = '';
         let guildId = msg.guild.id;
