@@ -86,7 +86,7 @@ client.on('message', async msg => {
                   }
                   
                   result.forEach(t => {
-                    msg.channel.send(`========= ${t.name}`);
+                    console.log(`========= ${t.name}`);
                     threadsEmbedAll.addField(`:lock:\t${t.name}`, apiThreadDetails(t, guildId), true);
                   });
                 }
