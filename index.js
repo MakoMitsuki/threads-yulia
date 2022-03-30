@@ -57,7 +57,7 @@ client.on('message', async msg => {
     let guildId = msg.guild.id;
 
     switch (msg.content) {
-      case "yulia getAllThreads":
+      case "+getAllThreads":
         let threadsEmbedAll = new MessageEmbed()
             .setColor('#0099ff')
             .setTitle('List of Threads')
@@ -100,7 +100,7 @@ client.on('message', async msg => {
         
         msg.channel.send({ embeds: [threadsEmbedAll] }); // Here, instead of above.
         break;
-      case "yulia getthreads active":
+      case "+getActiveThreads":
         let threadsEmbedActive = new MessageEmbed()
             .setColor('#0099ff')
             .setTitle('List of Active Threads')
