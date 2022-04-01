@@ -185,7 +185,21 @@ client.on('message', async msg => {
     }
   }
   else if (msg.content === "+getExcludedChannels"){
-
+    let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+    if (!thisServer) {
+      msg.reply(`There are no excluded channels in this server.`);
+    }
+    else {
+      if (thisServer.channelExceptionList.length == 0) {
+        msg.reply(`There are no excluded channels in this server.`);
+      } else {
+        let reply = "__**Excluded Channels List**__";
+        thisServer.channelExceptionList.forEach(channel => {
+          reply = reply.concat(`\n<#${channel._id}>`);
+        });
+        msg.reply(reply);
+      }
+    }
   }
 })
 
