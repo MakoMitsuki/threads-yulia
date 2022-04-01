@@ -68,7 +68,7 @@ client.on('message', async msg => {
         
         let channels = await msg.guild.channels.fetch();
 
-        channels.forEach(async (channel) => {
+        await Promise.all(channels.map(async (channel) => {
           let hasHeader = false;
 
           // get active threads
@@ -96,8 +96,9 @@ client.on('message', async msg => {
             threadsEmbedAll.addField('\u200B', '\u200B');
             console.log(`=== end of ${channel.name}`);
           };
-        });
+        }));
         
+
         msg.channel.send({ embeds: [threadsEmbedAll] }); // Here, instead of above.
         break;
       case "+getActiveThreads":
