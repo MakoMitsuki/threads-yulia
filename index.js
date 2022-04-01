@@ -162,18 +162,30 @@ client.on('message', async msg => {
   else if (msg.content.startsWith("+addExclusion")){
     let channelToExclude = msg.mentions.channels.first();
     if (channelToExclude) {
-      let thisServer = DiscordServer.findOne({ serverId: guildId }).exec();
+      let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
       if (!thisServer) {
-        thisServer = createDiscordServerRecord(msg.guild);
+        thisServer = new DiscordServer({
+          _id: mongoose.Types.ObjectId(),
+          serverId: msg.guild.id,
+          serverName: msg.guild.name,
+          channelExceptionList: []
+        });
+        thisServer.channelExceptionList.push({
+          _id: channelToExclude.id,
+          channelName: channelToExclude.name
+        });
+        thisServer.save()
+          .then(() => msg.reply(`**${channelToExclude.name}** is added to the exclusion list.`))
+          .catch((err) => console.log(err));
+      } else {
+        thisServer.channelExceptionList.push({
+          _id: channelToExclude.id,
+          channelName: channelToExclude.name
+        });
+        thisServer.save().then(() => {
+          msg.reply(`**${channelToExclude.name}** is added to the exclusion list.`);
+        }).catch((err) => console.log(err));
       }
-
-      thisServer.channelExceptionList.push({
-        _id: channelToExclude.id,
-        channelName: channelToExclude.name
-      });
-      thisServer.save().then(() => {
-        msg.reply(`**${channelToExclude.name}** is added to the exclusion list.`);
-      }).catch((err) => console.log(err));
     }
     else {
       msg.reply(`Did you indicate a channel to exclude? Please try it again using \`+addexclusion #your-channel-here\`!`);
