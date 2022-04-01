@@ -1,4 +1,5 @@
 require('dotenv').config();
+const mongoose = require('mongoose');
 const fetch = require("node-fetch");
 
 const { Client, Intents, MessageEmbed } = require('discord.js');
@@ -6,6 +7,15 @@ const { Client, Intents, MessageEmbed } = require('discord.js');
 const token = process.env.CLIENT_TOKEN;
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+
+mongoose.connect(process.env.MONGODB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => {
+  console.log('🚀 Connected to the MongoDB database!');
+}).catch((error) => {
+  console.log(error);
+});
 
 const arrowForward = ":arrow_forward:";
 
@@ -50,7 +60,7 @@ const apiThreadDetails = (thread, guildId) => {
 };
 
 client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+  console.log(`🚀 Logged in as ${client.user.tag}!`);
 });
 
 client.on('message', async msg => {
@@ -94,7 +104,6 @@ client.on('message', async msg => {
             threadsEmbedAll.addField('\u200B', '\u200B');
           };
         }));
-        
 
         msg.channel.send({ embeds: [threadsEmbedAll] }); // Here, instead of above.
         break;
