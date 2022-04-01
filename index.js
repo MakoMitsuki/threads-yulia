@@ -149,6 +149,8 @@ client.on('message', async msg => {
     let channelToExclude = msg.mentions.channels.first();
     if (channelToExclude) {
       let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+      
+      // TODO: stop embarassing yourself yulia and refactor this code 
       if (!thisServer) {
         thisServer = new DiscordServer({
           _id: mongoose.Types.ObjectId(),
@@ -164,13 +166,18 @@ client.on('message', async msg => {
           .then(() => msg.reply(`**${channelToExclude.name}** is added to the exclusion list.`))
           .catch((err) => console.log(err));
       } else {
-        thisServer.channelExceptionList.push({
-          _id: channelToExclude.id,
-          channelName: channelToExclude.name
-        });
-        thisServer.save().then(() => {
-          msg.reply(`**${channelToExclude.name}** is added to the exclusion list.`);
-        }).catch((err) => console.log(err));
+        let isExcluded = thisServer.channelExceptionList.id(channelToExclude.id);
+        if (isExcluded){
+          msg.reply(`**${channelToExclude.name}** is already added to the exclusion list.`);
+        } else {
+          thisServer.channelExceptionList.push({
+            _id: channelToExclude.id,
+            channelName: channelToExclude.name
+          });
+          thisServer.save().then(() => {
+            msg.reply(`**${channelToExclude.name}** is added to the exclusion list!`);
+          }).catch((err) => console.log(err));
+        }
       }
     }
     else {
