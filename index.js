@@ -77,12 +77,19 @@ client.on('message', async msg => {
         .setThumbnail(msg.guild.iconURL())
         .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
         .setTimestamp();
+
+    let excluded = [];
     
     let channels = await msg.guild.channels.fetch();
+    await DiscordServer.findOne({ serverId: guildId }).then(function (s) {
+      excluded = s ? s.channelExceptionList : [];
+    });
 
-    await Promise.all(channels.map(async (channel) => {
+    await Promise.all(channels.filter((ch) => {
+      return !excluded.includes(ch.id)
+    }).map(async (channel) => {
       let hasHeader = false;
-
+      console.log("channel here");
       // get active threads
       /*channel.threads.forEach(t => {
         threadsEmbedAll.addField(t.name, threadDetails(t, guildId), true);
@@ -158,22 +165,16 @@ client.on('message', async msg => {
           serverName: msg.guild.name,
           channelExceptionList: []
         });
-        thisServer.channelExceptionList.push({
-          _id: channelToExclude.id,
-          channelName: channelToExclude.name
-        });
+        thisServer.channelExceptionList.push(channelToExclude.id);
         thisServer.save()
           .then(() => msg.reply(`**${channelToExclude.name}** is added to the exclusion list.`))
           .catch((err) => console.log(err));
       } else {
-        let isExcluded = thisServer.channelExceptionList.id(channelToExclude.id);
+        let isExcluded = thisServer.channelExceptionList.includes(channelToExclude.id);
         if (isExcluded){
           msg.reply(`**${channelToExclude.name}** is already added to the exclusion list.`);
         } else {
-          thisServer.channelExceptionList.push({
-            _id: channelToExclude.id,
-            channelName: channelToExclude.name
-          });
+          thisServer.channelExceptionList.push(channelToExclude.id);
           thisServer.save().then(() => {
             msg.reply(`**${channelToExclude.name}** is added to the exclusion list!`);
           }).catch((err) => console.log(err));
@@ -195,7 +196,7 @@ client.on('message', async msg => {
       } else {
         let reply = "__**Excluded Channels List**__";
         thisServer.channelExceptionList.forEach(channel => {
-          reply = reply.concat(`\n<#${channel._id}>`);
+          reply = reply.concat(`\n<#${channel}>`);
         });
         msg.reply(reply);
       }
