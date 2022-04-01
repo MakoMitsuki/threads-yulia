@@ -69,7 +69,7 @@ client.on('ready', () => {
 client.on('message', async msg => {
   let guildId = msg.guild.id;
 
-  if(msg.content === "+getArchivedThreads") {
+  if(msg.content === "+getAllArchivedThreads") {
     let threadsEmbedAll = new MessageEmbed()
         .setColor('#0099ff')
         .setTitle('List of Threads')
