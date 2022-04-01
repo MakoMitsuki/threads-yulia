@@ -83,18 +83,15 @@ client.on('message', async msg => {
             if (!hasHeader && result.length !== 0){
               threadsEmbedAll.addField(arrowForward.concat("\t", channel.name.toUpperCase()), '\u200B', false);
               hasHeader = true;
-              console.log(`=== ${channel.name}`);
             }
             
             result.forEach(t => {
-              console.log(`========= ${t.name}`);
               threadsEmbedAll.addField(`:lock:\t${t.name}`, apiThreadDetails(t, guildId), true);
             });
           };
           
           if (hasHeader) {
             threadsEmbedAll.addField('\u200B', '\u200B');
-            console.log(`=== end of ${channel.name}`);
           };
         }));
         
