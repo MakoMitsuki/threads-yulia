@@ -22,20 +22,6 @@ mongoose.connect(process.env.MONGODB_URL, {
 
 const arrowForward = ":arrow_forward:";
 
-const createDiscordServerRecord = (guild) => {
-  const discordServer = new DiscordServer({
-    _id: mongoose.Types.ObjectId(),
-    serverId: guild.id,
-    serverName: guild.name,
-    channelExceptionList: []
-  });
-  discordServer.save()
-    .then(() => console.log(result))
-    .catch((err) => console.log(err));
-
-  return discordServer;
-}
-
 const getArchivedThreads = async (channelId) => {
   let archivedThreads = [];
 
