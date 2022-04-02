@@ -65,13 +65,17 @@ client.on('message', async msg => {
     let threadsEmbedAll = new MessageEmbed()
         .setColor('#0099ff')
         .setTitle('List of Threads')
-        .setDescription('Here is the list of all threads in this server')
+        .setDescription('Here is the list of all threads in this server. Archived threads that have been active for more than two months are not shown.')
         .setThumbnail(msg.guild.iconURL())
         .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
         .setTimestamp();
 
     let excluded = [];
     let activeThreads = null;
+
+    //get date two months before now
+    let expiryDate = new Date();
+    expiryDate.setMonth(expiryDate.getMonth() - 2);
     
     let channels = await msg.guild.channels.fetch();
     await DiscordServer.findOne({ serverId: guildId }).then(function (s) {
@@ -109,7 +113,10 @@ client.on('message', async msg => {
         }
         
         result.forEach(t => {
-          threadsEmbedAll.addField(`:lock:\t${t.name}`, apiThreadDetails(t, guildId), true);
+          // check if the thread has not been inactive for x months
+          if (Date.parse(t.thread_metadata.archive_timestamp) > expiryDate) {
+            threadsEmbedAll.addField(`:lock:\t${t.name}`, apiThreadDetails(t, guildId), true);
+          }
         });
       };
     }));
