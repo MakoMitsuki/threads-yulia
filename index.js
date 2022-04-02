@@ -20,8 +20,6 @@ mongoose.connect(process.env.MONGODB_URL, {
   console.log(error);
 });
 
-const arrowForward = ":arrow_forward:";
-
 const getArchivedThreads = async (channelId) => {
   let archivedThreads = [];
 
@@ -78,8 +76,11 @@ client.on('message', async msg => {
       .catch(console.error);
 
     await Promise.all(channels.filter((ch) => {
-      return !excluded.includes(ch.id)
-    }).map(async (channel) => {
+      return !excluded.includes(ch.id) && ch.type !== 'GUILD_VOICE' && ch.type !== 'GUILD_CATEGORY' && ch.type !== 'GUILD_STAGE_VOICE'
+    }).sort((c1, c2) => {
+      return c2.rawPosition - c1.rawPosition;
+    })
+    .map(async (channel) => {
       let header = "";
       let list = "";
 
@@ -111,7 +112,7 @@ client.on('message', async msg => {
 
       Promise.all([getActive, getArchived]).then(() => {
         if (header !== "" && list !== "") {
-          threadsEmbedAll.addField(header, list);
+          threadsEmbedAll.addField(`${header} ${channel.rawPosition}`, list);
         }
       });
     }));
