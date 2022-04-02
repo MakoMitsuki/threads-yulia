@@ -89,10 +89,21 @@ client.on('message', async msg => {
       return !excluded.includes(ch.id)
     }).map(async (channel) => {
       let hasHeader = false;
-      // get active threads
-      /*channel.threads.forEach(t => {
-        threadsEmbedAll.addField(t.name, threadDetails(t, guildId), true);
-      });*/
+
+      /* THIS DOES NOT WORK 
+      get active threads
+      let resultActive = [];
+      await channel.threads.fetchActive().then(res => resultActive = res);
+      if (resultActive) {
+        if (!hasHeader && result.length !== 0){
+          threadsEmbedAll.addField(arrowForward.concat("\t", channel.name.toUpperCase()), '\u200B', false);
+          hasHeader = true;
+        }
+
+        resultActive.forEach(t => {
+          threadsEmbedAll.addField(t.name, threadDetails(t, guildId), true);
+        });
+      } */
 
       // get archived threads
       let result = [];
@@ -181,7 +192,7 @@ client.on('message', async msg => {
       }
     }
     else {
-      msg.reply(`Did you indicate a channel to exclude? Please try it again using \`+addexclusion #your-channel-here\`!`);
+      msg.reply(`Did you indicate a channel to exclude? Please try it again using \`+addExclusion #your-channel-here\`!`);
     }
   }
   else if (msg.content.startsWith("+removeExclusion")){
@@ -205,7 +216,7 @@ client.on('message', async msg => {
       }
     }
     else {
-      msg.reply(`Did you indicate a channel to exclude? Please try it again using \`+addexclusion #your-channel-here\`!`);
+      msg.reply(`Did you indicate a channel to remove? Please try it again using \`+removeExclusion #your-channel-here\`!`);
     }
   }
   else if (msg.content === "+getExcludedChannels"){
