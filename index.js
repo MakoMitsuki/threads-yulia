@@ -118,42 +118,6 @@ client.on('message', async msg => {
 
     msg.channel.send({ embeds: [threadsEmbedAll] }); // Here, instead of above.
   }
-  else if (msg.content === "+getActiveThreads"){
-    /*let threadsEmbedActive = new MessageEmbed()
-      .setColor('#0099ff')
-      .setTitle('List of Active Threads')
-      .setDescription('Here is the list of active threads in this server')
-      .setThumbnail(msg.guild.iconURL())
-      .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
-      .setTimestamp();
-
-    let lastChannel = '';
-    let firstChannel = true;
-
-    await msg.guild.channels.fetchActiveThreads()
-      .then(fetched => {
-        fetched.threads.sort((thread1, thread2) => {
-            if(thread1.parent.name < thread2.parent.name) { return -1; }
-            if(thread1.parent.name > thread2.parent.name) { return 1; }
-            return 0;
-        }).map((thread) => {
-            if (thread.parent.name !== lastChannel)
-            {
-              if (!firstChannel) {
-                threadsEmbedActive.addField('\u200B', '\u200B');
-              }
-              threadsEmbedActive.addField(arrowForward.concat("\t", thread.parent.name.toUpperCase()), '\u200B', false);
-
-              lastChannel = thread.parent.name;
-              firstChannel = false;
-            }
-
-            threadsEmbedActive.addField(thread.name, threadDetails(thread, guildId), true);
-        });
-      })
-      .catch(console.error);
-    msg.channel.send({ embeds: [threadsEmbedActive] });*/
-  }
   else if (msg.content.startsWith("+addExclusion")){
     let channelToExclude = msg.mentions.channels.first();
     if (channelToExclude) {
