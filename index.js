@@ -130,6 +130,7 @@ client.on('message', async msg => {
           _id: mongoose.Types.ObjectId(),
           serverId: msg.guild.id,
           serverName: msg.guild.name,
+          adminRole: null,
           channelExceptionList: []
         });
         thisServer.channelExceptionList.push(channelToExclude.id);
@@ -193,7 +194,70 @@ client.on('message', async msg => {
       }
     }
   }
-})
+  else if (msg.content.startsWith("+setAdminOnly")){
+    let roleMention = msg.mentions.roles.first();
+    if (roleMention) {
+      let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+      
+      // TODO: stop embarassing yourself yulia and refactor this code 
+      if (!thisServer) {
+        thisServer = new DiscordServer({
+          _id: mongoose.Types.ObjectId(),
+          serverId: msg.guild.id,
+          serverName: msg.guild.name,
+          adminRole: roleMention.id,
+          channelExceptionList: []
+        });
+        thisServer.save()
+          .then(() => msg.reply(`Bot can now only be accessed by **${roleMention.name}**.`))
+          .catch((err) => console.log(err));
+      } else {
+        if (thisServer.adminRole === roleMention.id){
+          msg.reply(`Bot already set to only be accessible by **${roleMention.name}**.`);
+        } else {
+          thisServer.update({adminRole : roleMention.id});
+          thisServer.save().then(() => {
+            msg.reply(`Bot can now only be accessed by **${roleMention.name}**.`);
+          }).catch((err) => console.log(err));
+        }
+      }
+    }
+    else {
+      msg.reply(`Did you indicate an admin role? Please try it again using \`+setAdminOnly "@roleHere"\`!`);
+    }
+  }
+  else if (msg.content === "+unsetAdminOnly"){
+    let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+    
+    if (!thisServer) {
+      msg.reply(`Bot commands already has admin mode off.`);
+    } else {
+      if (thisServer.adminRole !== null ){
+        thisServer.update({adminRole : null});
+        thisServer.save().then(() => {
+          msg.reply(`Admin mode is turned off. Type \`+setAdminOnly "@roleHere"\` to reset.`);
+        }).catch((err) => console.log(err));
+      } else {
+        msg.reply(`Bot commands already has admin mode off.`);
+      }
+    }
+  }
+  else if (msg.content === "+isAdminOnly") {
+    let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+    
+    if (!thisServer) {
+      msg.reply(`Bot commands has admin mode off.`);
+    } else {
+      if (thisServer.adminRole == null ){
+        msg.reply(`Bot commands has admin mode off.`);
+      } else {
+        msg.guild.roles.fetch(thisServer.adminRole)
+        .then(role =>  msg.reply(`Bot commands are on admin mode. Only members with the **${role.name}** role can access this.`))
+        .catch(console.log(error));
+      }
+    }
+  }
+});
 
 //make sure this line is the last line
 client.login(token);
