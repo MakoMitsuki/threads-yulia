@@ -53,13 +53,14 @@ client.on('message', async msg => {
     let threadsEmbedAll = new MessageEmbed()
         .setColor('#0099ff')
         .setTitle('List of Threads')
-        .setDescription('Here is the list of all relevant threads in this server. \n*Archived threads that have been inactive for more than two months are not shown.*')
+        .setDescription('Archived threads that have been inactive for more than two months and channels excluded by server administrators are not shown.')
         .setThumbnail(msg.guild.iconURL())
         .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
         .setTimestamp();
 
     let excluded = [];
     let activeThreads = null;
+    let listMap = new Map();
 
     //get date two months before now
     let expiryDate = new Date();
@@ -77,15 +78,13 @@ client.on('message', async msg => {
 
     await Promise.all(channels.filter((ch) => {
       return !excluded.includes(ch.id) && ch.type !== 'GUILD_VOICE' && ch.type !== 'GUILD_CATEGORY' && ch.type !== 'GUILD_STAGE_VOICE'
-    }).sort((c1, c2) => {
-      return c2.rawPosition - c1.rawPosition;
     })
     .map(async (channel) => {
       let header = "";
       let list = "";
 
       // get active threads
-      let getActive = await activeThreads.map(t => {
+      await activeThreads.map(t => {
         if (t.parent.id === channel.id) {
           if (header === ""){
             header = channel.name.toUpperCase();
@@ -95,7 +94,7 @@ client.on('message', async msg => {
       });
 
       // get archived threads
-      let getArchived = await getArchivedThreads(channel.id).then(result => {
+      await getArchivedThreads(channel.id).then(result => {
         if(result) {
           if (header === "" && result.length !== 0){
             header = channel.name.toUpperCase();
@@ -110,12 +109,13 @@ client.on('message', async msg => {
         };
       });
 
-      Promise.all([getActive, getArchived]).then(() => {
         if (header !== "" && list !== "") {
-          threadsEmbedAll.addField(`${header} ${channel.rawPosition}`, list);
+          listMap.set(parseInt(channel.rawPosition), {cName: header, details: list});
         }
-      });
     }));
+
+    let mapAsc = new Map([...listMap].sort((a, b) => a[0] - b[0]));
+    mapAsc.forEach((value) => { threadsEmbedAll.addField(value.cName, value.details); });
 
     msg.channel.send({ embeds: [threadsEmbedAll] }); // Here, instead of above.
   }
