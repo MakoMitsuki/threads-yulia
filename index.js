@@ -44,16 +44,6 @@ const getArchivedThreads = async (channelId) => {
   return archivedThreads;
 };
 
-const threadDetails = (thread, guildId) => {
-  let details = `\n[Go to ${thread.name}](https://discord.com/channels/${guildId}/${thread.id})`;
-  return details;
-};
-
-const apiThreadDetails = (thread, guildId) => {
-  let details = `\n[Go to ${thread.name}](https://discord.com/channels/${guildId}/${thread.id})`;
-  return details;
-};
-
 client.on('ready', () => {
   console.log(`🚀 Logged in as ${client.user.tag}!`);
 });
@@ -65,7 +55,7 @@ client.on('message', async msg => {
     let threadsEmbedAll = new MessageEmbed()
         .setColor('#0099ff')
         .setTitle('List of Threads')
-        .setDescription('Here is the list of all threads in this server. Archived threads that have been active for more than two months are not shown.')
+        .setDescription('Here is the list of all relevant threads in this server. \n*Archived threads that have been inactive for more than two months are not shown.*')
         .setThumbnail(msg.guild.iconURL())
         .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
         .setTimestamp();
@@ -90,41 +80,46 @@ client.on('message', async msg => {
     await Promise.all(channels.filter((ch) => {
       return !excluded.includes(ch.id)
     }).map(async (channel) => {
-      let hasHeader = false;
+      let header = "";
+      let list = "";
 
       // get active threads
-      await activeThreads.map(t => {
+      let getActive = await activeThreads.map(t => {
         if (t.parent.id === channel.id) {
-          if (!hasHeader){
-            threadsEmbedAll.addField(arrowForward.concat("\t", channel.name.toUpperCase()), '\u200B', false);
-            hasHeader = true;
+          if (header === ""){
+            header = channel.name.toUpperCase();
           }
-          threadsEmbedAll.addField(t.name, threadDetails(t, guildId), true);
+          list = list.concat(`\n<#${t.id}>`);
         }
       });
 
       // get archived threads
-      let result = [];
-      await getArchivedThreads(channel.id).then(r => result = r);
-      if(result) {
-        if (!hasHeader && result.length !== 0){
-          threadsEmbedAll.addField(arrowForward.concat("\t", channel.name.toUpperCase()), '\u200B', false);
-          hasHeader = true;
-        }
-        
-        result.forEach(t => {
-          // check if the thread has not been inactive for x months
-          if (Date.parse(t.thread_metadata.archive_timestamp) > expiryDate) {
-            threadsEmbedAll.addField(`:lock:\t${t.name}`, apiThreadDetails(t, guildId), true);
+      let getArchived = await getArchivedThreads(channel.id).then(result => {
+        if(result) {
+          if (header === "" && result.length !== 0){
+            header = channel.name.toUpperCase();
           }
-        });
-      };
+          
+          result.forEach(t => {
+            // check if the thread has not been inactive for x months
+            if (Date.parse(t.thread_metadata.archive_timestamp) > expiryDate) {
+              list = list.concat(`\n :card_box: [${t.name}](https://discord.com/channels/${guildId}/${t.id})`);
+            }
+          });
+        };
+      });
+
+      Promise.all([getActive, getArchived]).then(() => {
+        if (header !== "" && list !== "") {
+          threadsEmbedAll.addField(header, list);
+        }
+      });
     }));
 
     msg.channel.send({ embeds: [threadsEmbedAll] }); // Here, instead of above.
   }
   else if (msg.content === "+getActiveThreads"){
-    let threadsEmbedActive = new MessageEmbed()
+    /*let threadsEmbedActive = new MessageEmbed()
       .setColor('#0099ff')
       .setTitle('List of Active Threads')
       .setDescription('Here is the list of active threads in this server')
@@ -157,7 +152,7 @@ client.on('message', async msg => {
         });
       })
       .catch(console.error);
-    msg.channel.send({ embeds: [threadsEmbedActive] });
+    msg.channel.send({ embeds: [threadsEmbedActive] });*/
   }
   else if (msg.content.startsWith("+addExclusion")){
     let channelToExclude = msg.mentions.channels.first();
