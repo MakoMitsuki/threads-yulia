@@ -45,20 +45,12 @@ const getArchivedThreads = async (channelId) => {
 };
 
 const threadDetails = (thread, guildId) => {
-  let details = "Created: ".concat(thread.createdAt.toDateString());
-  if (thread.lastMessage) {
-      details = details.concat("\n Last Message: ", thread.lastMessage.createdAt.toDateString());
-  }
-  details = details.concat(`\n[Go to ${thread.name}](https://discord.com/channels/${guildId}/${thread.id})`);
+  let details = `\n[Go to ${thread.name}](https://discord.com/channels/${guildId}/${thread.id})`;
   return details;
 };
 
 const apiThreadDetails = (thread, guildId) => {
-  let details = "";
-  if (thread.thread_metadata?.archived) {
-    details = details.concat("Archived: ", thread.thread_metadata.archive_timestamp);
-  }
-  details = details.concat(`\n[Go to ${thread.name}](https://discord.com/channels/${guildId}/${thread.id})`);
+  let details = `\n[Go to ${thread.name}](https://discord.com/channels/${guildId}/${thread.id})`;
   return details;
 };
 
@@ -69,7 +61,7 @@ client.on('ready', () => {
 client.on('message', async msg => {
   let guildId = msg.guild.id;
 
-  if(msg.content === "+getAllArchivedThreads") {
+  if(msg.content === "+getAllThreads") {
     let threadsEmbedAll = new MessageEmbed()
         .setColor('#0099ff')
         .setTitle('List of Threads')
@@ -79,31 +71,33 @@ client.on('message', async msg => {
         .setTimestamp();
 
     let excluded = [];
+    let activeThreads = null;
     
     let channels = await msg.guild.channels.fetch();
     await DiscordServer.findOne({ serverId: guildId }).then(function (s) {
       excluded = s ? s.channelExceptionList : [];
     });
+    await msg.guild.channels.fetchActiveThreads()
+      .then(fetched => {
+        activeThreads = fetched.threads.length == 0 ? [] : fetched.threads;
+      })
+      .catch(console.error);
 
     await Promise.all(channels.filter((ch) => {
       return !excluded.includes(ch.id)
     }).map(async (channel) => {
       let hasHeader = false;
 
-      /* THIS DOES NOT WORK 
-      get active threads
-      let resultActive = [];
-      await channel.threads.fetchActive().then(res => resultActive = res);
-      if (resultActive) {
-        if (!hasHeader && result.length !== 0){
-          threadsEmbedAll.addField(arrowForward.concat("\t", channel.name.toUpperCase()), '\u200B', false);
-          hasHeader = true;
-        }
-
-        resultActive.forEach(t => {
+      // get active threads
+      await activeThreads.map(t => {
+        if (t.parent.id === channel.id) {
+          if (!hasHeader){
+            threadsEmbedAll.addField(arrowForward.concat("\t", channel.name.toUpperCase()), '\u200B', false);
+            hasHeader = true;
+          }
           threadsEmbedAll.addField(t.name, threadDetails(t, guildId), true);
-        });
-      } */
+        }
+      });
 
       // get archived threads
       let result = [];
@@ -117,10 +111,6 @@ client.on('message', async msg => {
         result.forEach(t => {
           threadsEmbedAll.addField(`:lock:\t${t.name}`, apiThreadDetails(t, guildId), true);
         });
-      };
-      
-      if (hasHeader) {
-        threadsEmbedAll.addField('\u200B', '\u200B');
       };
     }));
 
