@@ -89,7 +89,6 @@ client.on('message', async msg => {
       return !excluded.includes(ch.id)
     }).map(async (channel) => {
       let hasHeader = false;
-      console.log("channel here");
       // get active threads
       /*channel.threads.forEach(t => {
         threadsEmbedAll.addField(t.name, threadDetails(t, guildId), true);
@@ -178,6 +177,30 @@ client.on('message', async msg => {
           thisServer.save().then(() => {
             msg.reply(`**${channelToExclude.name}** is added to the exclusion list!`);
           }).catch((err) => console.log(err));
+        }
+      }
+    }
+    else {
+      msg.reply(`Did you indicate a channel to exclude? Please try it again using \`+addexclusion #your-channel-here\`!`);
+    }
+  }
+  else if (msg.content.startsWith("+removeExclusion")){
+    let channelToExclude = msg.mentions.channels.first();
+    if (channelToExclude) {
+      let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+      
+      // TODO: stop embarassing yourself yulia and refactor this code 
+      if (!thisServer) {
+        msg.reply(`This server has no exclusions.`);
+      } else {
+        let isExcluded = thisServer.channelExceptionList.includes(channelToExclude.id);
+        if (isExcluded){
+          thisServer.channelExceptionList.pull(channelToExclude.id);
+          thisServer.save().then(() => {
+            msg.reply(`**${channelToExclude.name}** is removed from the exclusions ist!`);
+          }).catch((err) => console.log(err));
+        } else {
+          msg.reply(`**${channelToExclude.name}** is not the exclusion list so there is no need to remove it.`);
         }
       }
     }
