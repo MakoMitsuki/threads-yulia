@@ -49,6 +49,13 @@ client.on('ready', () => {
 client.on('message', async msg => {
   let guildId = msg.guild.id;
 
+  let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+  if (thisServer.adminRole) {
+    if (!message.member.roles.find(role => role.id === thisServer.adminRole)) {
+      return;
+    }
+  }
+
   if(msg.content === "+getAllThreads") {
     let threadsEmbedAll = new MessageEmbed()
         .setColor('#0099ff')
@@ -122,7 +129,7 @@ client.on('message', async msg => {
   else if (msg.content.startsWith("+addExclusion")){
     let channelToExclude = msg.mentions.channels.first();
     if (channelToExclude) {
-      let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+      
       
       // TODO: stop embarassing yourself yulia and refactor this code 
       if (!thisServer) {
@@ -156,7 +163,7 @@ client.on('message', async msg => {
   else if (msg.content.startsWith("+removeExclusion")){
     let channelToExclude = msg.mentions.channels.first();
     if (channelToExclude) {
-      let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+      
       
       // TODO: stop embarassing yourself yulia and refactor this code 
       if (!thisServer) {
@@ -178,7 +185,7 @@ client.on('message', async msg => {
     }
   }
   else if (msg.content === "+getExcludedChannels"){
-    let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+    
     if (!thisServer) {
       msg.reply(`There are no excluded channels in this server.`);
     }
@@ -197,7 +204,7 @@ client.on('message', async msg => {
   else if (msg.content.startsWith("+setAdminOnly")){
     let roleMention = msg.mentions.roles.first();
     if (roleMention) {
-      let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+      
       
       // TODO: stop embarassing yourself yulia and refactor this code 
       if (!thisServer) {
@@ -227,7 +234,7 @@ client.on('message', async msg => {
     }
   }
   else if (msg.content === "+unsetAdminOnly"){
-    let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+    
     
     if (!thisServer) {
       msg.reply(`Bot commands already has admin mode off.`);
@@ -243,7 +250,7 @@ client.on('message', async msg => {
     }
   }
   else if (msg.content === "+isAdminOnly") {
-    let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
+    
     
     if (!thisServer) {
       msg.reply(`Bot commands has admin mode off.`);
