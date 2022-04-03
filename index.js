@@ -51,9 +51,11 @@ client.on('message', async msg => {
     let guildId = msg.guild.id;
 
     let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
-    if (thisServer.adminRole) {
-      if (!msg.member.roles.cache.find(role => role.id === thisServer.adminRole)) {
-        return;
+    if (thisServer) {
+      if (thisServer.adminRole !== null) {
+        if (!msg.member.roles.cache.find(role => role.id === thisServer.adminRole)) {
+          return;
+        }
       }
     }
 
