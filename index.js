@@ -51,7 +51,7 @@ client.on('message', async msg => {
 
   let thisServer = await DiscordServer.findOne({ serverId: guildId }).exec();
   if (thisServer.adminRole) {
-    if (!message.member.roles.find(role => role.id === thisServer.adminRole)) {
+    if (!msg.member.roles.cache.find(role => role.id === thisServer.adminRole)) {
       return;
     }
   }
@@ -260,7 +260,7 @@ client.on('message', async msg => {
       } else {
         msg.guild.roles.fetch(thisServer.adminRole)
         .then(role =>  msg.reply(`Bot commands are on admin mode. Only members with the **${role.name}** role can access this.`))
-        .catch(console.log(error));
+        .catch((error) => console.log(error));
       }
     }
   }
