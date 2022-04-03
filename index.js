@@ -124,6 +124,9 @@ client.on('message', async msg => {
     let mapAsc = new Map([...listMap].sort((a, b) => a[0] - b[0]));
     mapAsc.forEach((value) => { threadsEmbedAll.addField(value.cName, value.details); });
 
+    if (!message.author.bot) {
+      message.delete(100);
+    }
     msg.channel.send({ embeds: [threadsEmbedAll] }); // Here, instead of above.
   }
   else if (msg.content.startsWith("+addExclusion")){
@@ -263,6 +266,15 @@ client.on('message', async msg => {
         .catch((error) => console.log(error));
       }
     }
+  }
+  else if (msg.content === "+help") {
+    let threadsHelp = new MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle('List of Threads')
+        .setDescription('Archived threads that have been inactive for more than two months and channels excluded by server administrators are not shown.')
+        .setThumbnail(msg.guild.iconURL())
+        .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
+        .setTimestamp();
   }
 });
 
