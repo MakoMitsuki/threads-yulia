@@ -124,8 +124,8 @@ client.on('message', async msg => {
     let mapAsc = new Map([...listMap].sort((a, b) => a[0] - b[0]));
     mapAsc.forEach((value) => { threadsEmbedAll.addField(value.cName, value.details); });
 
-    if (!message.author.bot) {
-      message.delete(100);
+    if (!msg.author.bot) {
+      msg.delete(100);
     }
     msg.channel.send({ embeds: [threadsEmbedAll] }); // Here, instead of above.
   }
