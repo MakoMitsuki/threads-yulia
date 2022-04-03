@@ -58,7 +58,7 @@ client.on('message', async msg => {
 
   if(msg.content === "+getAllThreads") {
     let threadsEmbedAll = new MessageEmbed()
-        .setColor('#0099ff')
+        .setColor('#808000')
         .setTitle('List of Threads')
         .setDescription('Archived threads that have been inactive for more than two months and channels excluded by server administrators are not shown.')
         .setThumbnail(msg.guild.iconURL())
@@ -253,8 +253,6 @@ client.on('message', async msg => {
     }
   }
   else if (msg.content === "+isAdminOnly") {
-    
-    
     if (!thisServer) {
       msg.reply(`Bot commands has admin mode off.`);
     } else {
@@ -269,12 +267,20 @@ client.on('message', async msg => {
   }
   else if (msg.content === "+help") {
     let threadsHelp = new MessageEmbed()
-        .setColor('#0099ff')
-        .setTitle('List of Threads')
-        .setDescription('Archived threads that have been inactive for more than two months and channels excluded by server administrators are not shown.')
+        .setColor('#808000')
+        .setTitle('Threads Yulia')
+        .setDescription('Things to note: As of Discord s.v. 122087, thread links displayed by this bot will not be redirectable on mobile.')
         .setThumbnail(msg.guild.iconURL())
+        .addFields(
+          { name: '+getAllThreads', value: 'Get all threads in the server, minus excluded channels and archived threads older than 2 months.' },
+          { name: '+addExclusion <#channelname>', value: 'Add a server to not include in the thread list'},
+          { name: '+removeExclusion <#channelname>', value: 'Remove a server from the exclusion list.'},
+          { name: '+getExcludedChannels', value: 'See which channels are excluded from the thread list.'},
+          { name: '+help', value: 'See this help list.'},
+        )
         .setFooter(`Refreshed by ${msg.author.username}`, msg.author.avatarURL())
         .setTimestamp();
+    msg.channel.send({ embeds: [threadsHelp] }); 
   }
 });
 
