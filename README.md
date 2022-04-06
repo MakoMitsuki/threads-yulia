@@ -33,3 +33,5 @@ See which channels are excluded from the thread list.
 
 `+help`
 See this help list.
+
+![image](https://user-images.githubusercontent.com/20171908/161947401-1c359948-da02-41e8-be83-27bb439e5cfd.png)
