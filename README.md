@@ -1,5 +1,6 @@
 # threads-yulia
-A Discord Bot to create a list of active threads in a server. Made for [Ohara](https://eu.finalfantasyxiv.com/lodestone/freecompany/9228860798900648108/).
+A Discord Bot to create a list of both active and inactive threads in a server... because Discord does not want to.
+Made for [Ohara](https://eu.finalfantasyxiv.com/lodestone/freecompany/9228860798900648108/).
 
 Credits to Katelynn Au'mar for helping with the algo and for being an MVP and hosting this bot, and also to Prim Rose, Fufugi Fugi, and [Felicia Floppe](https://github.com/alisarac) as well.
 
